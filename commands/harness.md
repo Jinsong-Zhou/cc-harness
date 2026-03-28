@@ -53,7 +53,7 @@ After the evaluator finishes:
 
 2. **Log the iteration** by piping JSON to the tracker:
    ```bash
-   echo '{"feature":"FEATURE_NAME","result":"PASS_OR_FAIL","score":AVG_SCORE,"duration":"DURATION"}' | CLAUDE_WORKING_DIRECTORY="$(pwd)" node "${CLAUDE_PLUGIN_ROOT}/scripts/hooks/track-iteration.js" log-iteration
+   echo '{"feature":"FEATURE_NAME","result":"PASS_OR_FAIL","score":AVG_SCORE,"duration":"DURATION","nextFeature":"NEXT_FEATURE_OR_NULL"}' | CLAUDE_WORKING_DIRECTORY="$(pwd)" node "${CLAUDE_PLUGIN_ROOT}/scripts/hooks/track-iteration.js" log-iteration
    ```
 
 3. **If FAIL** and fewer than 3 iterations on this feature: go back to Step A, telling the generator to read and fix the issues in `harness/qa-feedback.md`.

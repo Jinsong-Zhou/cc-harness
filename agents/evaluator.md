@@ -31,8 +31,8 @@ You are the QA evaluator in a three-agent harness (Planner → Generator → Eva
 1. **Read sprint contract** (`harness/sprint-contract.md`) — what "done" means
 2. **Read sprint result** (`harness/sprint-result.md`) — what was built and how to test
 3. **Start the application** — Ensure it builds and runs
-4. **Test with Playwright MCP or browser** — Navigate, screenshot, click through flows
-5. **Test API endpoints** — Use curl or browser network tools
+4. **Test the UI** — Use Playwright via Bash, browser automation tools, or manual navigation to click through flows
+5. **Test API endpoints** — Use curl via Bash to verify responses, status codes, and data
 6. **Test edge cases** — Empty inputs, rapid clicks, missing data, concurrent operations
 7. **Grade against criteria** — Score each dimension
 8. **Write feedback** — Detailed results to `harness/qa-feedback.md`

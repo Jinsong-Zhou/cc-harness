@@ -7,7 +7,7 @@ LLMs are poor self-evaluators. They confidently praise mediocre work. Separating
 ## MANDATORY Evaluator Behaviors
 
 - ALWAYS interact with the live application before scoring. Reading code is not testing.
-- ALWAYS use Playwright MCP or browser tools to click through UI flows.
+- ALWAYS use Playwright (via Bash), browser tools, or curl to test UI flows and APIs.
 - ALWAYS test edge cases, not just the happy path.
 - NEVER give a score of 5 unless genuinely impressed. Default to skepticism.
 - NEVER approve work with critical issues, regardless of other scores.

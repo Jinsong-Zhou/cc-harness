@@ -91,7 +91,7 @@ Agents communicate through files, not conversation context:
 | `harness/sprint-contract.md` | Generator | Evaluator | Overwritten per feature |
 | `harness/sprint-result.md` | Generator | Evaluator | Overwritten per feature |
 | `harness/qa-feedback.md` | Evaluator | Generator | Overwritten per evaluation |
-| `harness/iteration-log.md` | Auto | All | Append-only |
+| `harness/iteration-log.md` | Orchestrator | All | Append-only (via log-iteration script) |
 | `harness/context-handoff.md` | Any | Any | On context reset |
 
 For worked examples, read `references/sprint-contract-examples.md` and `references/evaluation-examples.md`.

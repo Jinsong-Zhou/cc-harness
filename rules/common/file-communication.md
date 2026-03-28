@@ -17,7 +17,7 @@ harness/
 ├── sprint-contract.md       # Generator → Evaluator: what "done" means
 ├── sprint-result.md         # Generator → Evaluator: what was built, how to test
 ├── qa-feedback.md           # Evaluator → Generator: grades, bugs, instructions
-├── iteration-log.md         # Auto: running log of all iterations and scores
+├── iteration-log.md         # Orchestrator: running log of all iterations and scores
 ├── context-handoff.md       # Any → Any: structured state for context resets
 └── .harness-state.json      # Machine-readable session state
 ```
