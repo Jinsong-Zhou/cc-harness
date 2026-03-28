@@ -22,19 +22,6 @@
         "description": "Save harness state before context compaction"
       }
     ],
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/run-with-flags.js\" \"log-iteration\" \"scripts/hooks/track-iteration.js\" \"standard,strict\"",
-            "timeout": 10
-          }
-        ],
-        "description": "Track file edits as part of iteration logging"
-      }
-    ],
     "Stop": [
       {
         "hooks": [

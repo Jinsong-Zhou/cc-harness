@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 
 /**
+ * @license MIT
+ * Copyright (c) 2026 cc-harness contributors
+ *
  * Harness iteration tracker.
  *
  * Can be invoked directly or via require() from run-with-flags.js.

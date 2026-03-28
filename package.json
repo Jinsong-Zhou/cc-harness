@@ -3,6 +3,18 @@
   "version": "1.1.0",
   "description": "Multi-agent harness framework for long-running application development with Claude Code. Implements generator-evaluator architecture from Anthropic's harness design research.",
   "license": "MIT",
+  "author": {
+    "name": "Jinsong Zhou",
+    "url": "https://github.com/Jinsong-Zhou"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Jinsong-Zhou/cc-harness"
+  },
+  "homepage": "https://github.com/Jinsong-Zhou/cc-harness",
+  "bugs": {
+    "url": "https://github.com/Jinsong-Zhou/cc-harness/issues"
+  },
   "keywords": [
     "claude-code",
     "plugin",
@@ -11,6 +23,18 @@
     "generator-evaluator",
     "long-running",
     "autonomous-coding"
+  ],
+  "files": [
+    "agents/",
+    "skills/",
+    "commands/",
+    "rules/",
+    "hooks/",
+    "scripts/",
+    ".claude-plugin/",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md"
   ],
   "engines": {
     "node": ">=18"

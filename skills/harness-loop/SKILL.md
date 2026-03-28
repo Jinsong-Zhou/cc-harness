@@ -139,6 +139,18 @@ For detailed calibration guidance, use the **harness-tuning** skill.
 - The planner should be ambitious; the evaluator should be skeptical; the generator should be resilient
 - Every harness component encodes an assumption about model limitations — periodically test whether each is still load-bearing
 
+## Troubleshooting
+
+| Problem | Cause | Solution |
+|---------|-------|----------|
+| Evaluator passes everything | Default LLM generosity | Tighten criteria — add "never give 5 unless genuinely impressed", "FAIL if any critical issue" |
+| Evaluator keeps failing the same feature | Spec too ambitious for one feature, or generator ignoring feedback | Split the feature into smaller pieces, or check that the generator is reading `qa-feedback.md` |
+| Generator ignores QA feedback | Generator context doesn't include the feedback file | Ensure generator reads `harness/qa-feedback.md` before starting fixes |
+| Planner produces too-ambitious spec | This is by design — but if 20+ features, consider scoping down | Ask planner to target 8-12 features, or manually trim the spec |
+| Quality degrades mid-session | Context deterioration | Use `context-management` skill — try compaction, then reset if needed |
+| Agent wraps up prematurely | Context anxiety (mainly Sonnet 4.5) | Switch to context resets or use Opus 4.5+ |
+| File communication breaks | Agent writes to wrong path or doesn't read handoff | Check `harness/` directory exists, verify agents reference correct file paths |
+
 ## Cost Reference
 
 | Approach | Duration | Cost | Quality |

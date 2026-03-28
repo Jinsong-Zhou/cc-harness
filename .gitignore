@@ -1,4 +1,8 @@
 node_modules/
 .DS_Store
-harness/
 *.log
+
+# Runtime session data — created in user projects when running /harness,
+# excluded here to prevent test artifacts from being committed during development
+harness/
+.claude/

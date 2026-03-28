@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 
 /**
+ * @license MIT
+ * Copyright (c) 2026 cc-harness contributors
+ *
  * Hook runner with profile-based gating.
  *
  * Usage: node run-with-flags.js <hookId> <scriptPath> <profiles>
