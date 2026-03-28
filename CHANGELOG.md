@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 
 Format based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.2.0] - 2026-03-28
+
+### Added
+- `examples/todo-app-harness/` — Complete worked example with SPEC.md, sprint-contract, sprint-result, and qa-feedback showing realistic harness artifacts
+- CLAUDE.md for plugin development guidance
+- CHANGELOG.md version history
+
+### Changed
+- `/harness` command rewritten from descriptive to executable orchestration with explicit agent invocation and log-iteration bash commands
+- `/evaluate` command: handles missing sprint contract, explicit scope determination process
+- `/harness-status` command rewritten with step-by-step data reading and rendering process
+- `SessionStart` hook: only fires when SPEC.md or harness/ exists (no side effects in non-harness projects)
+- `log-iteration` now called explicitly by orchestrator, not via hooks
+- Evaluator: "Playwright MCP" references corrected to "Playwright via Bash" (accurate tool usage)
+- iteration-log.md writer label: "Auto" → "Orchestrator" in skill and rules docs
+- `/harness` log JSON template includes `nextFeature` for status tracking
+- All 4 READMEs: removed stale PostToolUse hook references
+
+### Fixed
+- `run-with-flags.js` line 19: `require("fs")` → `require("path")`
+- `run-with-flags.js`: stdin hang when no pipe (check `process.stdin.isTTY`)
+- `run-with-flags.js`: async results silently swallowed by premature `process.exit(0)`
+- `track-iteration.js`: stdin hang on direct invocation without pipe
+- PostToolUse hook removed (was incorrectly counting file edits as iterations)
+- Synchronized package.json metadata with plugin.json (author, repository, bugs, files)
+
 ## [1.1.0] - 2026-03-28
 
 ### Added

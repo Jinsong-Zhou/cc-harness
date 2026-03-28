@@ -9,7 +9,7 @@
     {
       "name": "cc-harness",
       "description": "Multi-agent harness framework for long-running application development with Claude Code",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "source": {
         "source": "github",
         "repo": "Jinsong-Zhou/cc-harness"
