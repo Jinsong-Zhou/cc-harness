@@ -1,0 +1,20 @@
+{
+  "name": "cc-harness",
+  "version": "1.0.0",
+  "description": "Multi-agent harness framework for long-running application development. Implements generator-evaluator architecture with planner, generator, and evaluator agents for autonomous coding sessions.",
+  "author": {
+    "name": "cc-harness contributors"
+  },
+  "homepage": "https://github.com/cc-harness/cc-harness",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "harness",
+    "multi-agent",
+    "long-running",
+    "generator-evaluator",
+    "autonomous-coding",
+    "planner",
+    "evaluator"
+  ]
+}
