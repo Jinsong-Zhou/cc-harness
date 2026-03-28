@@ -73,6 +73,10 @@ function preCompact() {
 }
 
 function sessionStart() {
+  // Only initialize if a harness session is active (SPEC.md or harness/ exists)
+  if (!fs.existsSync(path.join(cwd, "SPEC.md")) && !fs.existsSync(harnessDir)) {
+    return;
+  }
   ensureLogFile();
   const state = readState();
 

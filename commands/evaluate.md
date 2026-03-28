@@ -6,13 +6,19 @@ description: Trigger a standalone evaluation of the current application using th
 
 Run the harness evaluator against the current application state, independent of the full harness loop. Useful for spot-checking quality at any point during development.
 
-## What This Command Does
+## Process
 
-1. Checks for an active sprint contract (`harness/sprint-contract.md`)
-2. Starts the application if not already running
-3. Invokes the **harness-evaluator** agent to test the live app
-4. Writes results to `harness/qa-feedback.md`
-5. Displays the evaluation summary with scores and issues
+1. Create `harness/` directory if it doesn't exist: `mkdir -p harness`
+2. Determine evaluation scope:
+   - If `harness/sprint-contract.md` exists and `$ARGUMENTS` is empty: evaluate against the sprint contract
+   - If `$ARGUMENTS` is provided: use it as the evaluation scope (e.g., "the login flow", "frontend design")
+   - If neither: evaluate the full application against `SPEC.md` if it exists, or ask the user what to evaluate
+3. Invoke the **harness-evaluator** agent via the Agent tool. Tell it:
+   - The evaluation scope (sprint contract, specific feature, or full app)
+   - Which grading criteria to use (full-stack or frontend design)
+   - To start the application and test it interactively
+   - To write results to `harness/qa-feedback.md`
+4. After the evaluator finishes, read `harness/qa-feedback.md` and display the summary to the user
 
 ## Arguments
 

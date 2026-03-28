@@ -4,19 +4,70 @@ description: Start a harnessed development session with planner → generator �
 
 # /harness — Start Harnessed Development
 
-Launch an autonomous development session using the three-agent harness architecture.
+You are orchestrating an autonomous development session using the three-agent harness architecture.
 
-## What This Command Does
+## Setup
 
-1. Creates the `harness/` directory and initializes `harness/iteration-log.md`
-2. Invokes the **harness-planner** agent to expand your prompt into `SPEC.md`
-3. Presents the spec for your approval
-4. Runs the generator-evaluator loop for each feature:
-   - **harness-generator** writes sprint contract → implements → commits → writes handoff
-   - **harness-evaluator** tests the live app → grades → writes feedback
-   - Iterates on failures (max 3 rounds per feature)
-5. Runs a final end-to-end evaluation
-6. Writes session summary to `harness/iteration-log.md`
+1. Create the `harness/` directory: `mkdir -p harness`
+2. Initialize iteration tracking by running:
+   ```bash
+   CLAUDE_WORKING_DIRECTORY="$(pwd)" node "${CLAUDE_PLUGIN_ROOT}/scripts/hooks/track-iteration.js" session-start
+   ```
+
+## Phase 1: Planning
+
+1. Take `$ARGUMENTS` as the user's project prompt. If empty, ask the user for a 1-4 sentence project description.
+2. Invoke the **harness-planner** agent via the Agent tool with the user's prompt.
+3. The planner writes `SPEC.md`. Present it to the user and ask for approval before continuing.
+
+## Phase 2: Build Loop
+
+For each feature in the spec, execute this cycle:
+
+### Step A: Generate
+
+Invoke the **harness-generator** agent via the Agent tool. Tell it:
+- Read `SPEC.md` for the product spec
+- Which feature to implement next
+- If this is a fix iteration (not the first attempt): read `harness/qa-feedback.md` for issues to fix
+
+The generator will:
+- Write `harness/sprint-contract.md` (defining "done")
+- Implement the feature
+- Commit to git
+- Write `harness/sprint-result.md` (what was built, how to test)
+
+### Step B: Evaluate
+
+Invoke the **harness-evaluator** agent via the Agent tool. Tell it:
+- Read `harness/sprint-contract.md` for success criteria
+- Read `harness/sprint-result.md` for test instructions
+- Start and test the live application
+- Write results to `harness/qa-feedback.md`
+
+### Step C: Log and Decide
+
+After the evaluator finishes:
+
+1. Read `harness/qa-feedback.md` to get the result (PASS/FAIL) and scores.
+
+2. **Log the iteration** by piping JSON to the tracker:
+   ```bash
+   echo '{"feature":"FEATURE_NAME","result":"PASS_OR_FAIL","score":AVG_SCORE,"duration":"DURATION"}' | CLAUDE_WORKING_DIRECTORY="$(pwd)" node "${CLAUDE_PLUGIN_ROOT}/scripts/hooks/track-iteration.js" log-iteration
+   ```
+
+3. **If FAIL** and fewer than 3 iterations on this feature: go back to Step A, telling the generator to read and fix the issues in `harness/qa-feedback.md`.
+4. **If FAIL** and 3 iterations reached: report to the user that this feature needs manual intervention. Move to the next feature.
+5. **If PASS**: move to the next feature in the spec.
+
+### Repeat Steps A-B-C for each feature.
+
+## Phase 3: Final Review
+
+After all features are complete:
+1. Invoke the **harness-evaluator** for a full end-to-end review of the entire application
+2. If issues found, invoke the **harness-generator** to address integration problems
+3. The Stop hook will automatically write a session summary to `harness/iteration-log.md`
 
 ## Arguments
 
@@ -29,34 +80,13 @@ Launch an autonomous development session using the three-agent harness architect
 /harness Build a collaborative markdown wiki with real-time editing
 ```
 
-If no arguments are provided, you will be asked for a project description.
+If no arguments are provided, ask the user for a project description.
 
-## How It Works
+## Important
 
-```
-┌──────────┐     SPEC.md      ┌───────────┐    qa-feedback    ┌───────────┐
-│ PLANNER  │────────────────►  │ GENERATOR │ ◄───────────────► │ EVALUATOR │
-└──────────┘                   └───────────┘                   └───────────┘
-                                    │                               │
-                                git commit                    tests live app
-                                    │                          via Playwright
-                                    ▼
-                              Working App
-```
-
-## Important Notes
-
-- **Always review the spec** before approving — this sets the scope for hours of work
-- **The evaluator is deliberately skeptical** — it will fail features with real bugs
-- **2-3 iterations per feature is normal** — don't be alarmed by FAIL assessments
-- **Git commits are checkpoints** — you can always roll back
+- **Always review the spec** before proceeding — this sets the scope for hours of work
+- **The evaluator is deliberately skeptical** — FAIL assessments are expected and healthy
+- **2-3 iterations per feature is normal** — never skip the evaluate step
+- **Git commits are checkpoints** — commit after each passing feature
 - Use `/harness-status` to check progress mid-session
-- Use `/evaluate` to trigger standalone evaluation at any point
-
-## Related
-
-- **harness-planner** agent — expands prompts into specs
-- **harness-generator** agent — builds features iteratively
-- **harness-evaluator** agent — skeptical QA testing
-- **harness-loop** skill — full orchestration details
-- **harness-tuning** skill — calibrating the evaluator
+- Use `/evaluate` for standalone evaluation at any point

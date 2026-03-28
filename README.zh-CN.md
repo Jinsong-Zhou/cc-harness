@@ -166,9 +166,8 @@ cc-harness/
 
 | 事件 | 配置级别 | 用途 |
 |------|---------|------|
-| `SessionStart` | minimal+ | 初始化或恢复 harness 状态 |
+| `SessionStart` | minimal+ | 初始化或恢复 harness 状态（仅当 SPEC.md 或 harness/ 存在时） |
 | `PreCompact` | minimal+ | 上下文压缩前保存状态 |
-| `PostToolUse` | standard+ | 跟踪文件编辑用于迭代日志 |
 | `Stop` | minimal+ | 写入包含指标的会话摘要 |
 
 **钩子配置级别：** 通过 `CC_HARNESS_PROFILE` 环境变量控制：

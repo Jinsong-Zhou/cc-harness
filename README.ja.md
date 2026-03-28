@@ -115,9 +115,8 @@ Anthropic の研究に基づく：[長時間アプリケーション開発のた
 
 | イベント | プロファイル | 目的 |
 |---------|------------|------|
-| `SessionStart` | minimal+ | ハーネス状態の初期化または復元 |
+| `SessionStart` | minimal+ | ハーネス状態の初期化または復元（SPEC.md または harness/ が存在する場合のみ） |
 | `PreCompact` | minimal+ | コンテキスト圧縮前の状態保存 |
-| `PostToolUse` | standard+ | 反復ログのためのファイル編集追跡 |
 | `Stop` | minimal+ | メトリクス付きセッションサマリーの書き込み |
 
 ## 評価基準

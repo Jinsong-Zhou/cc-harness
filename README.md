@@ -116,7 +116,7 @@ cc-harness/
 │       └── file-communication.md                # File-based agent communication protocol
 │
 ├── hooks/
-│   └── hooks.json                               # Lifecycle hooks: SessionStart, PreCompact, PostToolUse, Stop
+│   └── hooks.json                               # Lifecycle hooks: SessionStart, PreCompact, Stop
 │
 ├── scripts/
 │   └── hooks/
@@ -166,9 +166,8 @@ Always-loaded prescriptive guidelines:
 
 | Event | Profile | Purpose |
 |-------|---------|---------|
-| `SessionStart` | minimal+ | Initialize or restore harness state |
+| `SessionStart` | minimal+ | Initialize or restore harness state (only when SPEC.md or harness/ exists) |
 | `PreCompact` | minimal+ | Save state before context compaction |
-| `PostToolUse` | standard+ | Track file edits for iteration logging |
 | `Stop` | minimal+ | Write session summary with metrics |
 
 **Hook profiles:** Control verbosity via `CC_HARNESS_PROFILE` env var:
