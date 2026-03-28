@@ -32,6 +32,7 @@
     "hooks/",
     "scripts/",
     ".claude-plugin/",
+    "examples/",
     "LICENSE",
     "README.md",
     "CHANGELOG.md"

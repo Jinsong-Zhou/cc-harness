@@ -123,10 +123,23 @@ cc-harness/
 │       ├── run-with-flags.js                    # Profile-based hook runner (minimal/standard/strict)
 │       └── track-iteration.js                   # Iteration counter, state persistence, session summaries
 │
+├── examples/
+│   └── todo-app-harness/                        # Complete worked example of a harness session
+│       ├── SPEC.md                              # Example planner output
+│       ├── sprint-contract.md                   # Example sprint contract
+│       ├── sprint-result.md                     # Example generator handoff
+│       └── qa-feedback.md                       # Example evaluator feedback (FAIL with bugs)
+│
 ├── package.json
+├── CLAUDE.md                                     # Plugin development guide
+├── CHANGELOG.md                                  # Version history
 ├── LICENSE                                       # MIT
 └── README.md
 ```
+
+## Examples
+
+The `examples/todo-app-harness/` directory contains a complete worked example showing what each harness artifact looks like in practice — from planner spec through evaluator feedback with real bug reports. Review these to understand the expected depth and format.
 
 ## Components
 
