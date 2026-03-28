@@ -1,11 +1,13 @@
 {
   "name": "cc-harness",
-  "version": "1.0.0",
-  "description": "Multi-agent harness framework for long-running application development. Implements generator-evaluator architecture with planner, generator, and evaluator agents for autonomous coding sessions.",
+  "version": "1.1.0",
+  "description": "Multi-agent harness framework for long-running application development. Implements generator-evaluator architecture with planner, generator, and evaluator agents for autonomous multi-hour coding sessions.",
   "author": {
-    "name": "cc-harness contributors"
+    "name": "Jinsong Zhou",
+    "url": "https://github.com/Jinsong-Zhou"
   },
-  "homepage": "https://github.com/cc-harness/cc-harness",
+  "homepage": "https://github.com/Jinsong-Zhou/cc-harness",
+  "repository": "https://github.com/Jinsong-Zhou/cc-harness",
   "license": "MIT",
   "keywords": [
     "claude-code",
@@ -15,6 +17,16 @@
     "generator-evaluator",
     "autonomous-coding",
     "planner",
-    "evaluator"
-  ]
+    "evaluator",
+    "context-management",
+    "qa",
+    "sprint"
+  ],
+  "agents": [
+    "./agents/planner.md",
+    "./agents/generator.md",
+    "./agents/evaluator.md"
+  ],
+  "commands": ["./commands/"],
+  "skills": ["./skills/"]
 }

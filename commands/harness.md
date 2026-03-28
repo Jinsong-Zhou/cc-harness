@@ -1,50 +1,62 @@
 ---
-description: Start a harnessed development session with planner → generator → evaluator loop
+description: Start a harnessed development session with planner → generator → evaluator loop for autonomous multi-hour coding
 ---
 
-# Start Harness Session
+# /harness — Start Harnessed Development
 
-You are starting an autonomous harnessed development session using the generator-evaluator architecture.
+Launch an autonomous development session using the three-agent harness architecture.
 
-## Setup
+## What This Command Does
 
-1. Create the `harness/` directory in the project root if it doesn't exist
-2. Initialize `harness/iteration-log.md` with a header
+1. Creates the `harness/` directory and initializes `harness/iteration-log.md`
+2. Invokes the **harness-planner** agent to expand your prompt into `SPEC.md`
+3. Presents the spec for your approval
+4. Runs the generator-evaluator loop for each feature:
+   - **harness-generator** writes sprint contract → implements → commits → writes handoff
+   - **harness-evaluator** tests the live app → grades → writes feedback
+   - Iterates on failures (max 3 rounds per feature)
+5. Runs a final end-to-end evaluation
+6. Writes session summary to `harness/iteration-log.md`
 
-## Workflow
+## Arguments
 
-### Step 1: Plan
-- Take the user's prompt (the arguments to this command, or ask if none provided)
-- Invoke the **harness-planner** agent to expand it into `SPEC.md`
-- Show the spec to the user and ask for approval before proceeding
+`$ARGUMENTS` is your project prompt — a 1-4 sentence description of what to build.
 
-### Step 2: Build Loop
-For each feature in the spec, run the generator-evaluator loop:
+**Examples:**
+```
+/harness Build a retro 2D game maker with sprite editor and level designer
+/harness Create a browser-based DAW using the Web Audio API
+/harness Build a collaborative markdown wiki with real-time editing
+```
 
-1. Invoke **harness-generator** agent to:
-   - Write `harness/sprint-contract.md`
-   - Implement the feature
-   - Commit to git
-   - Write `harness/sprint-result.md`
+If no arguments are provided, you will be asked for a project description.
 
-2. Invoke **harness-evaluator** agent to:
-   - Test the live application
-   - Grade against criteria
-   - Write `harness/qa-feedback.md`
+## How It Works
 
-3. If FAIL: generator reads feedback and iterates (max 3 rounds per feature)
-4. If PASS: log the result and move to next feature
+```
+┌──────────┐     SPEC.md      ┌───────────┐    qa-feedback    ┌───────────┐
+│ PLANNER  │────────────────►  │ GENERATOR │ ◄───────────────► │ EVALUATOR │
+└──────────┘                   └───────────┘                   └───────────┘
+                                    │                               │
+                                git commit                    tests live app
+                                    │                          via Playwright
+                                    ▼
+                              Working App
+```
 
-5. Append each iteration to `harness/iteration-log.md`
+## Important Notes
 
-### Step 3: Final Review
-After all features are complete:
-- Run a full end-to-end evaluation
-- Address any remaining integration issues
-- Summarize the session (time, cost, iterations, final scores)
+- **Always review the spec** before approving — this sets the scope for hours of work
+- **The evaluator is deliberately skeptical** — it will fail features with real bugs
+- **2-3 iterations per feature is normal** — don't be alarmed by FAIL assessments
+- **Git commits are checkpoints** — you can always roll back
+- Use `/harness-status` to check progress mid-session
+- Use `/evaluate` to trigger standalone evaluation at any point
 
-## Important
-- Always commit working code between features
-- Never skip the evaluator — self-evaluation is unreliable
-- If the evaluator passes everything, its criteria need tightening
-- Use the harness-tuning skill if the loop needs calibration
+## Related
+
+- **harness-planner** agent — expands prompts into specs
+- **harness-generator** agent — builds features iteratively
+- **harness-evaluator** agent — skeptical QA testing
+- **harness-loop** skill — full orchestration details
+- **harness-tuning** skill — calibrating the evaluator

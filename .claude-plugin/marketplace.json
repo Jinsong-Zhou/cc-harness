@@ -1,18 +1,24 @@
 {
-  "name": "cc-harness-dev",
-  "description": "Development marketplace for cc-harness plugin",
+  "name": "cc-harness-marketplace",
+  "description": "Marketplace for the cc-harness plugin — multi-agent harness framework for long-running application development",
   "owner": {
-    "name": "cc-harness contributors"
+    "name": "Jinsong Zhou",
+    "url": "https://github.com/Jinsong-Zhou"
   },
   "plugins": [
     {
       "name": "cc-harness",
-      "description": "Multi-agent harness framework for long-running application development",
-      "version": "1.0.0",
-      "source": "./",
+      "description": "Multi-agent harness framework for long-running application development with Claude Code",
+      "version": "1.1.0",
+      "source": {
+        "source": "github",
+        "repo": "Jinsong-Zhou/cc-harness"
+      },
       "author": {
-        "name": "cc-harness contributors"
-      }
+        "name": "Jinsong Zhou"
+      },
+      "category": "workflow",
+      "tags": ["harness", "multi-agent", "autonomous", "long-running", "evaluator"]
     }
   ]
 }

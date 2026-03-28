@@ -1,94 +1,172 @@
 # cc-harness
 
-A Claude Code plugin that implements a multi-agent harness framework for long-running application development. Based on Anthropic's research on [harness design for long-running apps](https://www.anthropic.com/engineering/harness-design-long-running-apps).
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-orange)](https://github.com/Jinsong-Zhou/cc-harness)
 
-## What It Does
+**Multi-agent harness framework for long-running application development with Claude Code.**
 
-Single-agent approaches to complex coding tasks produce superficially impressive but often broken results. This plugin provides a **generator-evaluator architecture** — inspired by GANs — that separates creation from evaluation, driving real quality through iterative feedback loops.
+Based on Anthropic's research: [Harness Design for Long-Running Application Development](https://www.anthropic.com/engineering/harness-design-long-running-apps)
 
-### Three-Agent Architecture
+---
+
+## Why This Exists
+
+Single-agent approaches to complex coding tasks produce superficially impressive but often **broken** results. Two persistent problems:
+
+1. **Self-evaluation bias** — Models confidently praise their own mediocre work. Separating creation from evaluation is the strongest lever for quality.
+2. **Context deterioration** — Models lose coherence over long sessions. Structured handoffs and context management keep multi-hour builds on track.
+
+This plugin implements a **generator-evaluator architecture** (inspired by GANs) that drives real quality through iterative feedback loops.
+
+## Architecture
 
 ```
-User Prompt → Planner → Generator ⇄ Evaluator → Working Application
+User Prompt (1-4 sentences)
+        │
+        ▼
+┌──────────────┐
+│   PLANNER    │──→ SPEC.md (ambitious product spec)
+│  (read-only) │
+└──────────────┘
+        │
+        ▼
+┌──────────────┐         file-based          ┌──────────────┐
+│  GENERATOR   │◄──────communication────────►│  EVALUATOR   │
+│  (builds)    │                              │  (tests)     │
+└──────────────┘                              └──────────────┘
+        │                                            │
+   git commit                                  tests live app
+        ▲                                     via Playwright/
+        └────────iterate if FAIL──────────────browser tools
 ```
 
-- **Planner**: Expands 1-4 sentence prompts into ambitious product specs
-- **Generator**: Implements features one at a time, commits to git
-- **Evaluator**: Skeptical QA agent that tests the live application via browser/Playwright
+## Quick Start
 
-### Why It Works
-
-1. **Self-evaluation bias is real** — Models confidently praise their own mediocre work. Separating creation from evaluation is a strong lever.
-2. **Context deterioration is manageable** — Structured handoffs and context management strategies keep multi-hour sessions coherent.
-3. **Iterative improvement works** — 2-3 rounds of generate → evaluate → fix produces actually working applications vs. facades.
-
-## Installation
+### Installation
 
 ```bash
-/plugin marketplace add <your-github-username>/cc-harness
-/plugin install cc-harness@<marketplace-name>
+# Add the marketplace
+/plugin marketplace add Jinsong-Zhou/cc-harness
+
+# Install the plugin
+/plugin install cc-harness@cc-harness-marketplace
 ```
 
 Then restart Claude Code.
 
-## Usage
+### Usage
 
-### Start a Harnessed Session
+```bash
+# Start a harnessed development session
+/harness Build a browser-based DAW using the Web Audio API
 
-```
-/harness Build a retro 2D game maker with sprite editor and level designer
-```
+# Evaluate current work at any point
+/evaluate
+/evaluate the login flow
+/evaluate frontend design
 
-This will:
-1. Expand your prompt into a detailed product spec
-2. Show you the spec for approval
-3. Build features one at a time with QA evaluation after each
-4. Iterate on failures until quality criteria are met
-
-### Evaluate Current Work
-
-```
-/evaluate                    # Full application evaluation
-/evaluate the login flow     # Evaluate a specific feature
-/evaluate frontend design    # Use frontend design criteria
-```
-
-### Check Progress
-
-```
+# Check session progress
 /harness-status
+```
+
+## What's Inside
+
+```
+cc-harness/
+├── .claude-plugin/
+│   ├── plugin.json                              # Plugin identity & metadata
+│   └── marketplace.json                         # Marketplace distribution config
+│
+├── agents/
+│   ├── planner.md                               # Expands prompts → ambitious product specs
+│   ├── generator.md                             # Builds features one at a time, commits to git
+│   └── evaluator.md                             # Skeptical QA — tests live apps, grades against criteria
+│
+├── skills/
+│   ├── harness-loop/
+│   │   ├── SKILL.md                             # Core generator-evaluator iteration loop orchestration
+│   │   └── references/
+│   │       ├── sprint-contract-examples.md      # Worked examples of sprint contracts
+│   │       └── evaluation-examples.md           # Calibrated QA feedback examples from real runs
+│   ├── context-management/
+│   │   └── SKILL.md                             # Compaction vs reset strategies for long sessions
+│   └── harness-tuning/
+│       ├── SKILL.md                             # Evaluator calibration & harness simplification
+│       └── references/
+│           └── audit-template.md                # Template for auditing harness component necessity
+│
+├── commands/
+│   ├── harness.md                               # /harness — start a harnessed development session
+│   ├── evaluate.md                              # /evaluate — trigger standalone QA evaluation
+│   └── harness-status.md                        # /harness-status — show session progress & scores
+│
+├── rules/
+│   └── common/
+│       ├── harness-workflow.md                  # Mandatory pipeline: plan → contract → build → evaluate
+│       ├── evaluator-discipline.md              # Evaluator mindset rules — skepticism over politeness
+│       ├── context-strategy.md                  # When to compact vs reset, model-specific guidance
+│       └── file-communication.md                # File-based agent communication protocol
+│
+├── hooks/
+│   └── hooks.json                               # Lifecycle hooks: SessionStart, PreCompact, PostToolUse, Stop
+│
+├── scripts/
+│   └── hooks/
+│       ├── run-with-flags.js                    # Profile-based hook runner (minimal/standard/strict)
+│       └── track-iteration.js                   # Iteration counter, state persistence, session summaries
+│
+├── package.json
+├── LICENSE                                       # MIT
+└── README.md
 ```
 
 ## Components
 
 ### Agents
 
-| Agent | Purpose |
-|-------|---------|
-| `harness-planner` | Converts brief prompts into ambitious product specs |
-| `harness-generator` | Builds features iteratively with git commits |
-| `harness-evaluator` | Skeptical QA — tests live apps, grades against criteria |
+| Agent | Model | Tools | Purpose |
+|-------|-------|-------|---------|
+| `harness-planner` | Opus | Read-only | Converts 1-4 sentence prompts into ambitious product specs |
+| `harness-generator` | Opus | Full write | Builds features iteratively with git commits |
+| `harness-evaluator` | Opus | Read + Bash | Skeptical QA — tests live apps via Playwright/browser |
 
 ### Skills
 
-| Skill | Purpose |
-|-------|---------|
-| `harness-loop` | Orchestrates the full generator-evaluator iteration loop |
-| `context-management` | Strategies for compaction vs context resets in long sessions |
-| `harness-tuning` | Guide for calibrating evaluator and simplifying harness over time |
+| Skill | Trigger | Purpose |
+|-------|---------|---------|
+| `harness-loop` | Building complex apps autonomously | Orchestrates the full planner → generator → evaluator loop |
+| `context-management` | Long sessions approaching limits | Strategies for compaction vs resets, structured handoffs |
+| `harness-tuning` | Optimizing harness performance | Evaluator calibration, component removal, prompt engineering |
 
 ### Commands
 
 | Command | Purpose |
 |---------|---------|
-| `/harness` | Start a harnessed development session |
-| `/evaluate` | Trigger standalone evaluation |
+| `/harness <prompt>` | Start a harnessed development session |
+| `/evaluate [scope]` | Trigger standalone evaluation |
 | `/harness-status` | Show session progress and scores |
+
+### Rules
+
+Always-loaded prescriptive guidelines:
+- **harness-workflow** — Mandatory pipeline for complex builds
+- **evaluator-discipline** — Skepticism over politeness in QA
+- **context-strategy** — When and how to manage context
+- **file-communication** — Protocol for inter-agent file communication
 
 ### Hooks
 
-- **PreCompact**: Saves harness state before context compaction
-- **Stop**: Writes session summary with duration, iterations, and feature counts
+| Event | Profile | Purpose |
+|-------|---------|---------|
+| `SessionStart` | minimal+ | Initialize or restore harness state |
+| `PreCompact` | minimal+ | Save state before context compaction |
+| `PostToolUse` | standard+ | Track file edits for iteration logging |
+| `Stop` | minimal+ | Write session summary with metrics |
+
+**Hook profiles:** Control verbosity via `CC_HARNESS_PROFILE` env var:
+- `minimal` — State persistence only
+- `standard` (default) — State + iteration tracking
+- `strict` — All hooks including verbose logging
 
 ## Grading Criteria
 
@@ -96,52 +174,59 @@ This will:
 
 | Criterion | Weight | Measures |
 |-----------|--------|----------|
-| Product Depth | High | Real functionality vs facades |
-| Functionality | High | Does it actually work? |
-| Visual Design | Medium | Polished, consistent UI |
-| Code Quality | Low | Broken fundamentals only |
+| Product Depth | HIGH | Real functionality vs facades — can users complete workflows? |
+| Functionality | HIGH | Does it actually work? Bugs, edge cases, error states? |
+| Visual Design | MEDIUM | Polished, consistent, full-viewport UI with coherent identity |
+| Code Quality | LOW | Competence check — broken fundamentals only |
 
 ### Frontend Design
 
 | Criterion | Weight | Measures |
 |-----------|--------|----------|
-| Design Quality | High | Coherent whole vs parts |
-| Originality | High | Custom decisions vs AI patterns |
-| Craft | Medium | Typography, spacing, color |
-| Functionality | Medium | Usability |
+| Design Quality | HIGH | Coherent whole vs collection of parts — mood and identity |
+| Originality | HIGH | Custom decisions vs AI patterns / template defaults |
+| Craft | MEDIUM | Typography, spacing, color harmony, contrast |
+| Functionality | MEDIUM | Usability independent of aesthetics |
 
 ## File-Based Communication
 
-Agents communicate through files in the `harness/` directory:
+Agents communicate through files in `harness/`, not conversation context:
 
 ```
 harness/
-├── sprint-contract.md    # Generator proposes what "done" means
-├── sprint-result.md      # Generator describes what was built
-├── qa-feedback.md        # Evaluator grades and lists issues
-├── iteration-log.md      # Running log of all iterations
-└── .harness-state.json   # Machine-readable session state
+├── sprint-contract.md       # Generator → Evaluator: what "done" means
+├── sprint-result.md         # Generator → Evaluator: what was built
+├── qa-feedback.md           # Evaluator → Generator: grades + issues
+├── iteration-log.md         # Running log of all iterations
+├── context-handoff.md       # Structured state for context resets
+└── .harness-state.json      # Machine-readable session metrics
 ```
-
-## Adapting to New Models
-
-Every harness component encodes an assumption about model limitations. As models improve, use the `harness-tuning` skill to systematically remove components that are no longer load-bearing:
-
-- Sprint decomposition was removed for Opus 4.6 (maintains coherence over 2+ hour builds)
-- Context resets were removed for Opus 4.5+ (no context anxiety)
-- The evaluator remains load-bearing across all model versions (self-evaluation bias persists)
 
 ## Cost Reference
 
 | Approach | Duration | Cost | Quality |
 |----------|----------|------|---------|
-| Solo agent | ~20 min | ~$9 | Broken core features |
-| Full harness | ~6 hours | ~$200 | Working, polished |
-| Simplified harness | ~4 hours | ~$125 | Working, comparable |
+| Solo agent (no harness) | ~20 min | ~$9 | Broken core features |
+| Full harness (with sprints) | ~6 hours | ~$200 | Working, polished |
+| Simplified harness (no sprints) | ~4 hours | ~$125 | Working, comparable |
+
+> The full harness costs ~20x more than solo but produces **actually working** applications.
+
+## Adapting to New Models
+
+Every harness component encodes an assumption about model limitations. Use the `harness-tuning` skill to systematically audit which components are still load-bearing:
+
+| Component | Status with Opus 4.6 |
+|-----------|---------------------|
+| Planner | **Keep** — models don't naturally expand scope ambitiously |
+| Evaluator | **Keep** — self-evaluation bias persists across all versions |
+| Sprint decomposition | **Removed** — model maintains coherence over 2+ hour builds |
+| Context resets | **Removed** — no context anxiety in recent models |
 
 ## Credits
 
-Based on research by Prithvi Rajasekaran at Anthropic: [Harness Design for Long-Running Application Development](https://www.anthropic.com/engineering/harness-design-long-running-apps)
+Based on research by Prithvi Rajasekaran at Anthropic:
+[Harness Design for Long-Running Application Development](https://www.anthropic.com/engineering/harness-design-long-running-apps)
 
 ## License
 

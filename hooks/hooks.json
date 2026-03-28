@@ -1,13 +1,38 @@
 {
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/run-with-flags.js\" \"session-start\" \"scripts/hooks/track-iteration.js\" \"minimal,standard,strict\""
+          }
+        ],
+        "description": "Initialize or restore harness session state"
+      }
+    ],
     "PreCompact": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/track-iteration.js\" pre-compact"
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/run-with-flags.js\" \"pre-compact\" \"scripts/hooks/track-iteration.js\" \"minimal,standard,strict\""
           }
-        ]
+        ],
+        "description": "Save harness state before context compaction"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/run-with-flags.js\" \"log-iteration\" \"scripts/hooks/track-iteration.js\" \"standard,strict\"",
+            "timeout": 10
+          }
+        ],
+        "description": "Track file edits as part of iteration logging"
       }
     ],
     "Stop": [
@@ -15,9 +40,10 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/track-iteration.js\" session-summary"
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/run-with-flags.js\" \"session-summary\" \"scripts/hooks/track-iteration.js\" \"minimal,standard,strict\""
           }
-        ]
+        ],
+        "description": "Write session summary with duration, iterations, and scores"
       }
     ]
   }

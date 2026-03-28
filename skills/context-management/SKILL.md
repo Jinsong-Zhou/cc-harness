@@ -1,66 +1,73 @@
 ---
 name: context-management
-description: Use when running long coding sessions that approach context limits - provides strategies for compaction vs context resets, structured handoffs, and managing context anxiety
+description: Use when running long coding sessions that approach context limits - provides strategies for compaction vs context resets, structured handoffs, and managing context anxiety across model versions
+origin: cc-harness
 ---
 
 # Context Management for Long-Running Tasks
 
-Strategies for maintaining coherence and performance during multi-hour autonomous coding sessions. Based on lessons learned from building complex applications with Claude over 3-6+ hour sessions.
+Strategies for maintaining coherence and performance during multi-hour autonomous coding sessions. Based on lessons from building complex applications over 3-6+ hour sessions.
 
 ## When to Use
 
 - Sessions approaching context window limits
 - Observing degraded output quality mid-session
-- Agent appears to be "wrapping up" prematurely
+- Agent appears to be "wrapping up" prematurely (context anxiety)
 - Planning a task expected to run 1+ hours
 - Deciding between compaction and context reset strategies
+- After a harness phase transition (planning → building → evaluating)
 
 ## Two Failure Modes
 
 ### 1. Context Window Deterioration
 
-Models lose coherence on lengthy tasks as the context window fills. Earlier instructions get compressed or lost, leading to:
+Models lose coherence on lengthy tasks as the context fills. Symptoms:
 - Forgetting established patterns and conventions
-- Repeating earlier mistakes
+- Repeating earlier mistakes that were already fixed
 - Inconsistent naming, styling, or architecture decisions
 - Drift from the original spec
+- Introducing bugs in previously working code
 
 ### 2. Context Anxiety
 
 Some models begin wrapping up work prematurely as they approach what they believe is their context limit. Symptoms:
-- Skipping planned features
-- Producing minimal implementations
+- Skipping planned features ("I'll leave this for later")
+- Producing minimal stub implementations
 - Adding "TODO" comments instead of implementing
 - Summarizing remaining work instead of doing it
+- Rushing through the last few features with lower quality
+
+> "Claude Sonnet 4.5 exhibited context anxiety strongly enough that compaction alone wasn't sufficient to enable strong long task performance, so context resets became essential."
 
 ## Strategy: Compaction
 
-**What it is:** Summarizing earlier parts of the conversation in place so the same agent can keep going on shortened history.
+**What:** Summarize earlier conversation in place so the same agent continues on shortened history.
 
 **When to use:**
-- The agent is performing well but approaching context limits
-- Continuity matters — the agent has built up important local state/understanding
-- The model handles compaction well (Opus 4.5+ generally does)
+- Agent performing well but approaching limits
+- Continuity matters — agent has built up important state
+- Model handles compaction well (Opus 4.5+ generally does)
+- No signs of context anxiety
 
 **Strengths:**
 - Preserves conversation continuity
 - No handoff overhead
-- Agent retains implicit understanding of decisions made
+- Agent retains implicit understanding
 
 **Weaknesses:**
-- Doesn't eliminate context anxiety in models prone to it
+- Doesn't eliminate context anxiety in prone models
 - Summarization may lose important details
 - Compounding summaries degrade over time
 
 ## Strategy: Context Reset
 
-**What it is:** Clearing the context window entirely and starting a fresh agent with a structured handoff.
+**What:** Clear the context window entirely, start a fresh agent with structured handoff.
 
 **When to use:**
 - Compaction alone isn't sufficient (agent shows context anxiety)
-- Natural breakpoint between features/phases
+- Natural breakpoint between features or phases
 - Agent has gone off track and needs a clean start
-- Switching between build and evaluate phases
+- Switching between harness phases (build → evaluate)
 
 **Strengths:**
 - Eliminates context anxiety completely
@@ -69,72 +76,87 @@ Some models begin wrapping up work prematurely as they approach what they believ
 
 **Weaknesses:**
 - Requires structured handoff (overhead)
-- Loses implicit context the previous agent built up
+- Loses implicit context
 - Handoff artifacts must be comprehensive
-
-## Structured Handoff Protocol
-
-When performing a context reset, write a handoff file that the new agent reads:
-
-```markdown
-# Context Handoff
-
-## Project State
-[What has been built so far — list of completed features]
-
-## Current Task
-[What the new agent should work on next]
-
-## Architecture Decisions
-[Key decisions made during the session that must be preserved]
-- Decision 1: [what and why]
-- Decision 2: [what and why]
-
-## File Map
-[Key files and their purposes]
-- `src/components/Editor.tsx` — Main editor component
-- `src/api/routes.py` — API endpoint definitions
-
-## Known Issues
-[Problems discovered but not yet fixed]
-
-## Conventions Established
-[Patterns the new agent must follow]
-- Naming: camelCase for components, snake_case for API
-- State: Zustand store in `src/store/`
-- API: REST, all routes under `/api/v1/`
-
-## Next Steps
-1. [Specific next task]
-2. [Following task]
-```
 
 ## Model-Specific Behavior
 
-| Model | Context Anxiety | Recommended Strategy |
-|-------|----------------|---------------------|
-| Sonnet 4.5 | Strong | Context resets essential |
-| Opus 4.5 | Minimal | Compaction usually sufficient |
-| Opus 4.6 | Minimal | Compaction usually sufficient; can run 2+ hours coherently |
+| Model | Context Anxiety | Coherence Duration | Recommended Strategy |
+|-------|----------------|-------------------|---------------------|
+| Sonnet 4.5 | Strong | ~30 min | Context resets essential |
+| Opus 4.5 | Minimal | ~1-2 hours | Compaction usually sufficient |
+| Opus 4.6 | Minimal | 2+ hours | Compaction sufficient; can run coherently for full builds |
 
 ## Decision Framework
 
 ```
 Is the agent showing context anxiety?
-├── Yes → Use context reset with structured handoff
+├── Yes → Context reset with structured handoff
 └── No
-    ├── Is quality degrading?
+    ├── Is quality degrading? (inconsistencies, forgotten patterns)
     │   ├── Yes → Try compaction first, reset if no improvement
     │   └── No → Continue, monitor for degradation
-    └── At a natural breakpoint (feature complete)?
+    └── At a natural breakpoint? (feature complete, phase transition)
         ├── Yes → Good time for preventive compaction
         └── No → Continue
+```
+
+## Structured Handoff Protocol
+
+When performing a context reset, write `harness/context-handoff.md`:
+
+```markdown
+# Context Handoff
+
+## Project State
+[What has been built — completed features with status]
+- Feature 1: PASS (2 iterations)
+- Feature 2: PASS (1 iteration)
+- Feature 3: In progress — sprint contract written, not yet implemented
+
+## Current Task
+[What the new agent should work on next — be specific]
+
+## Architecture Decisions
+[Key decisions that must be preserved — include reasoning]
+- Using Zustand for state management — chosen over Redux for simplicity,
+  all stores in `src/store/`
+- API routes prefixed with `/api/v1/` — versioned for future compatibility
+- SQLite with WAL mode — single-file DB in `data/app.db`
+
+## File Map
+[Key files and their purposes — the new agent needs this to navigate]
+- `src/components/Editor.tsx` — Main editor component (canvas + tools)
+- `src/components/Sidebar.tsx` — Tool palette and settings panels
+- `src/api/routes/` — All FastAPI route modules
+- `src/store/editorStore.ts` — Editor state (zoom, tool, selection)
+- `SPEC.md` — Product specification (source of truth)
+- `harness/` — Harness communication files
+
+## Known Issues
+[Problems discovered but not yet fixed]
+- Tile palette scrollbar barely visible in dark theme
+- Grid overlay flickers during rapid zoom changes
+
+## Conventions Established
+[Patterns the new agent must follow for consistency]
+- Components: PascalCase, one component per file
+- API routes: snake_case, grouped by resource in separate modules
+- State: Zustand stores, named `*Store.ts`
+- Styling: Tailwind CSS with project-specific color tokens in tailwind.config
+- Error handling: try/catch on all API calls, toast notifications for user-facing errors
+
+## Next Steps
+1. Implement Feature 3 per the sprint contract in harness/sprint-contract.md
+2. After completion, write sprint-result.md for evaluator
+3. Remaining features from SPEC.md: Feature 4, Feature 5, Feature 6
 ```
 
 ## Guidelines
 
 - **Preventive > reactive** — Compact or reset before quality degrades, not after
-- **Natural breakpoints** — Feature completions, phase transitions, and commit points are ideal times
-- **Preserve decisions** — Architecture choices, naming conventions, and "why" reasoning are the most important things to carry forward
-- **File map is critical** — The new agent needs to know where things are without exploring the entire codebase
-- **Test after reset** — Verify the new agent can build and run the app before resuming feature work
+- **Natural breakpoints** — Feature completions, phase transitions, and commit points are ideal
+- **Preserve decisions** — Architecture choices, naming conventions, and "why" reasoning are most critical
+- **File map is mandatory** — The new agent needs to know where things are without re-exploring
+- **Test after reset** — Verify the new agent can build and run the app before resuming
+- **Don't over-handoff** — If the model can run 2+ hours coherently (Opus 4.6), don't reset unnecessarily
