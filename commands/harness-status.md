@@ -4,58 +4,52 @@ description: Show current harness session status — iteration count, scores, fe
 
 # /harness-status — Session Status
 
-Display the current state of the harness session with feature progress, scores, and metrics.
+Display the current state of the harness session.
 
-## What This Command Does
+## Process
 
-1. Reads `SPEC.md` for the total feature list
-2. Reads `harness/.harness-state.json` for session metrics
-3. Reads `harness/iteration-log.md` for completed iterations
-4. Reads `harness/qa-feedback.md` for the latest evaluation
-5. Reads `harness/sprint-contract.md` for current in-progress work
-6. Displays a formatted status dashboard
+1. Check if `SPEC.md` and `harness/` exist. If neither exists, respond:
+   > No active harness session found. Use `/harness <your project description>` to start one.
 
-## Output Format
+2. Read these files (skip any that don't exist):
+   - `SPEC.md` — extract the feature list to determine total features and names
+   - `harness/.harness-state.json` — extract iterations, scores, features completed/failed, currentFeature, compactions, startTime
+   - `harness/iteration-log.md` — read the iteration table rows for per-feature history
+   - `harness/qa-feedback.md` — extract the latest evaluation result and critical issues
+   - `harness/sprint-contract.md` — extract current in-progress feature name
+
+3. Calculate derived metrics:
+   - Duration: `now - startTime` from .harness-state.json
+   - Progress: `features.completed / total features from SPEC.md`
+   - Avg score: from `scores` array in .harness-state.json
+
+4. Display in this format:
 
 ```
 ## Harness Status
 
-**Project:** RetroForge — 2D Retro Game Maker
-**Duration:** 2 hr 15 min
-**Progress:** 6/16 features complete
-**Current:** Sprite Editor — Animation Frames (iteration 2/3)
-**Avg Score:** 3.4
+**Project:** [name from SPEC.md H1]
+**Duration:** [calculated from startTime]
+**Progress:** [completed/total] features complete
+**Current:** [currentFeature from state, or sprint-contract feature name, or "None"]
+**Avg Score:** [calculated from scores array]
 
-### Feature Progress
-| # | Feature | Status | Iterations | Avg Score |
-|---|---------|--------|------------|-----------|
-| 1 | Project Dashboard | PASS | 1 | 4.0 |
-| 2 | Canvas Setup | PASS | 2 | 3.5 |
-| 3 | Tile Palette | PASS | 1 | 3.8 |
-| 4 | Basic Tile Placement | PASS | 1 | 4.2 |
-| 5 | Sprite Editor — Drawing | PASS | 3 | 3.2 |
-| 6 | Sprite Editor — Animation | FAIL (2/3) | 2 | 2.5 |
-| 7 | Entity System | Pending | — | — |
-| … | … | … | … | … |
+### Iteration Log
+[render the contents of harness/iteration-log.md]
 
 ### Latest Evaluation
-**Feature:** Sprite Editor — Animation Frames
-**Result:** FAIL
-**Critical Issues:** Frame reorder API returns 422 (route ordering bug)
+**Feature:** [from qa-feedback.md]
+**Result:** [PASS/FAIL from qa-feedback.md]
+**Critical Issues:** [list from qa-feedback.md, or "None"]
 
 ### Session Metrics
 | Metric | Value |
 |--------|-------|
-| Compactions | 1 |
-| Git commits | 8 |
-| QA rounds | 9 |
+| Total iterations | [from state] |
+| Features completed | [from state] |
+| Features failed | [from state] |
+| Compactions | [from state] |
 ```
-
-## No Active Session
-
-If no harness session exists (no `harness/` directory or `SPEC.md`):
-
-> No active harness session found. Use `/harness <your project description>` to start one.
 
 ## Related
 
