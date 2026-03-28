@@ -16,7 +16,7 @@
  *   - CLAUDE_PLUGIN_ROOT: Plugin installation root
  */
 
-const path = require("fs");
+const path = require("path");
 const { spawnSync } = require("child_process");
 
 const [, , hookId, scriptRelPath, profiles = "standard,strict"] = process.argv;
@@ -43,7 +43,7 @@ if (disabledHooks.includes(hookId)) {
 
 // Resolve script path
 const pluginRoot = process.env.CLAUDE_PLUGIN_ROOT || __dirname.replace(/[/\\]scripts[/\\]hooks$/, "");
-const scriptPath = require("path").resolve(pluginRoot, scriptRelPath);
+const scriptPath = path.resolve(pluginRoot, scriptRelPath);
 
 // Security: prevent path traversal
 if (!scriptPath.startsWith(pluginRoot)) {
@@ -51,13 +51,14 @@ if (!scriptPath.startsWith(pluginRoot)) {
   process.exit(1);
 }
 
-// Read stdin (hook payload)
+// Read stdin (hook payload) — only if stdin is piped (not a TTY)
 let stdin = "";
-try {
-  const fs = require("fs");
-  stdin = fs.readFileSync(0, { encoding: "utf8", flag: "r" });
-} catch {
-  // No stdin available — that's fine
+if (!process.stdin.isTTY) {
+  try {
+    stdin = require("fs").readFileSync(0, { encoding: "utf8", flag: "r" });
+  } catch {
+    // No stdin available — that's fine
+  }
 }
 
 // Try to require the script if it exports a run() function
@@ -66,9 +67,15 @@ try {
   if (typeof mod.run === "function") {
     const result = mod.run(hookId, stdin, process.env);
     if (result && typeof result.then === "function") {
-      result.catch(() => process.exit(0));
+      result
+        .then(() => process.exit(0))
+        .catch((err) => {
+          console.error(`[cc-harness] Hook ${hookId} async error:`, err.message || err);
+          process.exit(1);
+        });
+    } else {
+      process.exit(0);
     }
-    process.exit(0);
   }
 } catch {
   // Fall through to spawn

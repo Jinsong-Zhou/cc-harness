@@ -181,10 +181,12 @@ module.exports.run = function (hookId, stdin, env) {
 if (require.main === module) {
   const command = process.argv[2];
   let stdin = "";
-  try {
-    stdin = require("fs").readFileSync(0, { encoding: "utf8", flag: "r" });
-  } catch {
-    // No stdin
+  if (!process.stdin.isTTY) {
+    try {
+      stdin = fs.readFileSync(0, { encoding: "utf8", flag: "r" });
+    } catch {
+      // No stdin
+    }
   }
   module.exports.run(command, stdin, process.env);
 }
